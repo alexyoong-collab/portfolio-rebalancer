@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portfolio Rebalancer</title>
+  <meta name="description" content="Track your ASX portfolio and calculate rebalancing trades">
+  <meta name="theme-color" content="#0F1729">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Rebalancer">
+  <link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAIAAADdvvtQAAADEUlEQVR4nO3dsU3cYBiA4SOKlI6UrAATZIC0bEPFBFRskzYDZAPmoEuXgkhBETHGrw//vjxPy3fCNi+/T+Czzz5fXB1gqQ9bbwD7JiASAZEIiERAJAIiERCJgEgERCIgEgGRCIhEQCQCIhEQiYBIBEQiIBIBkQiIREAkAiIREImASAREIiASAZEIiERAJAIiERCJgEgERCIgko9bb8Apu7z5NvHVh/vrd9uS4zlzj8RjmE7nub1n5BS2vvn1vHV4QAIiEdDKFqwou16EBEQiIBIBkQiIREAkAiIREImASAREIiASAZEIiERAJAIiERCJgEgERCIgEgGRCIhEQCQCIhEQiYBIBERyOnfnOL+bukvB4+2OP/05slMIaDqd5zMyWt3uT2Fz6lk2zBy7D4ht7TugBSuKRWhd+w6IzQmIREAkAiIREImASAREIiASAZEIiERAJAIiERCJgEhO4YrE/8GwF+wKaHSDX7DrFDa08S/YFRCJgMa1iwt2BUQiIBIBkQiIREAkAiIREMnG/8q4vJn66/vDvY8hj26zgKbTeT4jo5FtcwqbU8+yYd6Z90AkGwS0YEWxCA3LCkTigrK//fj6aXrgy/ef77MluyCgP15N5/mYjJ44hf02s57F86dKQCQCOhyWLicWoYOAiAREIiASAZEIiERAJAIiERCJgEgERCIgEgGRCIhEQCQCIhEQiYBIBEQiIBIBkQiIREAkAiIREImASAREIiASAZEIiERAJAIiERCJgEgERCIgEgGRCIhEQCQCIhEQiYBIBEQiIBIBkQiIREAkAiLZIKCH++u1XvJ4++anOb/4kmXPr3zxVQPu3VHtYAVa8CP5lxWP71rPTB1z7+bbJqD5R+3VyflHbXryTUFMDw+4d8dz9vniapNv/OTyZmq33/TbeX43NTz/+K742O8B9251GwfE3u3gPRAjExCJgEgERCIgEgGRCIhEQCQCIhEQiYBIBEQiIBIBkQiIREAkAiIREImASAREIiASAZEIiERAJAIiERCJgEgERCIgEgGRCIhEQCQCIvkFHId5fJ+s4YMAAAAASUVORK5CYII=">
+
+  <!-- Inline PWA manifest -->
+  <link rel="manifest" href="data:application/json,%7B%22name%22%3A%22Portfolio+Rebalancer%22%2C%22short_name%22%3A%22Rebalancer%22%2C%22description%22%3A%22Track+your+ASX+portfolio+and+calculate+rebalancing+trades%22%2C%22start_url%22%3A%22.%2F%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230F1729%22%2C%22theme_color%22%3A%22%230F1729%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fpng%3Bbase64%2CiVBORw0KGgoAAAANSUhEUgAAAMAAAADACAIAAADdvvtQAAADEUlEQVR4nO3dsU3cYBiA4SOKlI6UrAATZIC0bEPFBFRskzYDZAPmoEuXgkhBETHGrw//vjxPy3fCNi+/T+Czzz5fXB1gqQ9bbwD7JiASAZEIiERAJAIiERCJgEgERCIgEgGRCIhEQCQCIhEQiYBIBEQiIBIBkQiIREAkAiIREImASAREIiASAZEIiERAJAIiERCJgEgERCIgko9bb8Apu7z5NvHVh/vrd9uS4zlzj8RjmE7nub1n5BS2vvn1vHV4QAIiEdDKFqwou16EBEQiIBIBkQiIREAkAiIREImASAREIiASAZEIiERAJAIiERCJgEgERCIgEgGRCIhEQCQCIhEQiYBIBERyOnfnOL+bukvB4+2OP/05slMIaDqd5zMyWt3uT2Fz6lk2zBy7D4ht7TugBSuKRWhd+w6IzQmIREAkAiIREImASAREIiASAZEIiERAJAIiERCJgEhO4YrE/8GwF+wKaHSDX7DrFDa08S/YFRCJgMa1iwt2BUQiIBIBkQiIREAkAiIREMnG/8q4vJn66/vDvY8hj26zgKbTeT4jo5FtcwqbU8+yYd6Z90AkGwS0YEWxCA3LCkTigrK//fj6aXrgy/ef77MluyCgP15N5/mYjJ44hf02s57F86dKQCQCOhyWLicWoYOAiAREIiASAZEIiERAJAIiERCJgEgERCIgEgGRCIhEQCQCIhEQiYBIBEQiIBIBkQiIREAkAiIREImASAREIiASAZEIiERAJAIiERCJgEgERCIgEgGRCIhEQCQCIhEQiYBIBEQiIBIBkQiIREAkAiLZIKCH++u1XvJ4++anOb/4kmXPr3zxVQPu3VHtYAVa8CP5lxWP71rPTB1z7+bbJqD5R+3VyflHbXryTUFMDw+4d8dz9vniapNv/OTyZmq33/TbeX43NTz/+K742O8B9251GwfE3u3gPRAjExCJgEgERCIgEgGRCIhEQCQCIhEQiYBIBEQiIBIBkQiIREAkAiIREImASAREIiASAZEIiERAJAIiERCJgEgERCIgEgGRCIhEQCQCIvkFHId5fJ+s4YMAAAAASUVORK5CYII=%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image%2Fpng%22%7D%5D%7D">
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:          #0F1729;
+      --surface-0:   #0a1020;
+      --surface-1:   #162035;
+      --surface-2:   #1E2D4A;
+      --border:      rgba(255,255,255,0.08);
+      --border-strong: rgba(255,255,255,0.18);
+      --text-primary:  #F0F4FF;
+      --text-secondary:#A8B8D0;
+      --text-muted:    #5A7090;
+      --text-accent:   #378ADD;
+      --text-success:  #1D9E75;
+      --text-danger:   #E24B4A;
+      --bg-success:    rgba(29,158,117,0.12);
+      --bg-danger:     rgba(226,75,74,0.12);
+      --fill-accent:   #378ADD;
+      --on-accent:     #fff;
+      --radius:        8px;
+      --font-sans:     -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --font-mono:     "SF Mono", "Fira Code", Consolas, monospace;
+    }
+
+    html, body {
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      font-size: 15px;
+      line-height: 1.5;
+    }
+
+    /* App shell */
+    .app-header {
+      background: var(--surface-2);
+      border-bottom: 0.5px solid var(--border);
+      padding: 0 1.5rem;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .app-logo {
+      width: 28px; height: 28px;
+      background: var(--fill-accent);
+      border-radius: 7px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .app-logo svg { width: 16px; height: 16px; }
+    .app-title { font-size: 15px; font-weight: 600; color: var(--text-primary); }
+    .app-subtitle { font-size: 12px; color: var(--text-muted); margin-left: auto; }
+
+    .app-body {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 1.5rem 1.25rem 3rem;
+    }
+
+    /* Install banner */
+    #install-banner {
+      display: none;
+      background: var(--surface-2);
+      border: 0.5px solid var(--border-strong);
+      border-radius: var(--radius);
+      padding: 12px 16px;
+      margin-bottom: 1.25rem;
+      align-items: center;
+      gap: 12px;
+    }
+    #install-banner.show { display: flex; }
+    .install-text { font-size: 13px; color: var(--text-secondary); flex: 1; }
+    .install-text strong { color: var(--text-primary); }
+
+    /* Shared components */
+    .section-label {
+      font-size: 11px; font-weight: 500; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.75rem;
+    }
+    .card {
+      background: var(--surface-2); border: 0.5px solid var(--border);
+      border-radius: 12px; padding: 1.25rem; margin-bottom: 1.25rem;
+    }
+    .upload-zone {
+      border: 1.5px dashed var(--border-strong); border-radius: 12px;
+      padding: 2rem; text-align: center; cursor: pointer;
+      transition: background 0.15s; margin-bottom: 0.75rem;
+    }
+    .upload-zone:hover, .upload-zone.drag { background: var(--surface-1); border-color: var(--fill-accent); }
+    .upload-title { font-size: 15px; font-weight: 500; color: var(--text-primary); margin-bottom: 0.35rem; }
+    .upload-sub { font-size: 13px; color: var(--text-muted); }
+    .upload-sub span { color: var(--text-accent); cursor: pointer; text-decoration: underline; }
+    input[type="file"] { display: none; }
+
+    .metrics {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 10px; margin-bottom: 1.5rem;
+    }
+    .metric { background: var(--surface-1); border-radius: var(--radius); padding: 1rem; }
+    .metric-label { font-size: 11px; color: var(--text-muted); margin-bottom: 4px; }
+    .metric-value { font-size: 22px; font-weight: 500; font-family: var(--font-mono); }
+    .metric-value.pos { color: var(--text-success); }
+    .metric-value.neg { color: var(--text-danger); }
+
+    .tabs { display: flex; gap: 4px; margin-bottom: 1.25rem; background: var(--surface-1); border-radius: var(--radius); padding: 4px; width: fit-content; }
+    .tab {
+      font-size: 13px; padding: 6px 14px; border-radius: 6px; border: none;
+      background: transparent; color: var(--text-secondary); cursor: pointer;
+      font-family: var(--font-sans); transition: background 0.12s, color 0.12s;
+    }
+    .tab.active { background: var(--surface-2); color: var(--text-primary); font-weight: 500; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 13px; table-layout: fixed; }
+    th {
+      font-size: 11px; font-weight: 500; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.06em; padding: 0 0 10px; text-align: left;
+    }
+    th:not(:first-child) { text-align: right; }
+    td { padding: 11px 0; border-top: 0.5px solid var(--border); color: var(--text-primary); vertical-align: middle; }
+    td:not(:first-child) { text-align: right; font-family: var(--font-mono); font-size: 12px; }
+
+    .ticker { font-weight: 600; font-size: 13px; }
+    .name { font-size: 11px; color: var(--text-muted); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    .pill { display: inline-block; font-size: 11px; font-weight: 500; padding: 2px 7px; border-radius: 4px; }
+    .pill.buy { background: var(--bg-success); color: var(--text-success); }
+    .pill.sell { background: var(--bg-danger); color: var(--text-danger); }
+    .pill.hold { background: var(--surface-1); color: var(--text-muted); }
+    .pill.cash { background: var(--surface-1); color: var(--text-muted); }
+    .trade-amount { font-size: 13px; font-family: var(--font-mono); }
+    .trade-amount.buy { color: var(--text-success); }
+    .trade-amount.sell { color: var(--text-danger); }
+    .trade-amount.hold { color: var(--text-muted); }
+
+    .bar-wrap { display: flex; align-items: center; gap: 8px; justify-content: flex-end; }
+    .bar-track { width: 60px; height: 6px; background: var(--surface-0); border-radius: 3px; overflow: hidden; position: relative; flex-shrink: 0; }
+    .bar-fill { height: 100%; border-radius: 3px; position: absolute; top: 0; left: 0; transition: width 0.3s ease; }
+
+    .cash-note { font-size: 12px; color: var(--text-muted); margin-top: 8px; }
+    .cash-tag { font-size: 10px; color: var(--text-muted); border: 0.5px solid var(--border); border-radius: 3px; padding: 1px 5px; margin-left: 4px; vertical-align: middle; }
+
+    .target-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-top: 0.5px solid var(--border); }
+    .target-input { width: 100px; text-align: right; font-family: var(--font-mono); font-size: 13px; background: var(--surface-1); border: 0.5px solid var(--border-strong); border-radius: 6px; color: var(--text-primary); padding: 5px 8px; }
+    .target-input:focus { outline: none; border-color: var(--fill-accent); }
+
+    .total-badge { font-size: 13px; font-weight: 500; }
+    .total-badge.ok { color: var(--text-success); }
+    .total-badge.err { color: var(--text-danger); }
+
+    .btn {
+      border: 0.5px solid var(--border-strong); background: transparent;
+      color: var(--text-primary); border-radius: var(--radius);
+      padding: 7px 14px; font-size: 13px; cursor: pointer; font-family: var(--font-sans);
+      transition: background 0.12s;
+    }
+    .btn:hover { background: var(--surface-1); }
+    .btn.primary { background: var(--fill-accent); color: var(--on-accent); border-color: transparent; }
+    .btn.primary:hover { opacity: 0.9; }
+    .btn.sm { padding: 4px 10px; font-size: 12px; }
+
+    .threshold-row { display: flex; align-items: center; gap: 10px; margin-bottom: 1rem; font-size: 13px; color: var(--text-secondary); }
+    .threshold-row input[type=range] { flex: 1; accent-color: var(--fill-accent); }
+    .threshold-val { font-weight: 500; min-width: 32px; font-family: var(--font-mono); }
+
+    .divider { border: none; border-top: 0.5px solid var(--border); margin: 12px 0; }
+
+    .cash-row { display: flex; align-items: center; gap: 10px; }
+    .cash-input { width: 150px; font-family: var(--font-mono); font-size: 13px; background: var(--surface-1); border: 0.5px solid var(--border-strong); border-radius: 6px; color: var(--text-primary); padding: 6px 10px; }
+    .cash-input:focus { outline: none; border-color: var(--fill-accent); }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      .app-subtitle { display: none; }
+      .app-body { padding: 1rem 0.75rem 2rem; }
+      .metrics { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="app-logo">
+    <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="1" y="9" width="3" height="6" rx="1" fill="white" opacity="0.7"/>
+      <rect x="6" y="5" width="3" height="10" rx="1" fill="white"/>
+      <rect x="11" y="2" width="3" height="13" rx="1" fill="white" opacity="0.7"/>
+    </svg>
+  </div>
+  <span class="app-title">Portfolio Rebalancer</span>
+  <span class="app-subtitle">ASX · Equal weight</span>
+</header>
+
+<main class="app-body">
+
+  <div id="install-banner">
+    <div class="install-text"><strong>Install as app</strong> — open your browser menu and choose "Install app" or "Add to home screen" to use this as a standalone app with its own icon.</div>
+    <button class="btn sm" id="install-btn">Install</button>
+    <button class="btn sm" onclick="document.getElementById('install-banner').classList.remove('show')">✕</button>
+  </div>
+
+  <div id="upload-section">
+    <div class="section-label">Your holdings</div>
+    <div class="upload-zone" id="drop-zone">
+      <input type="file" id="xlsx-file" accept=".xlsx,.csv">
+      <div style="font-size:28px;margin-bottom:8px;">📂</div>
+      <div class="upload-title">Drop your Navexa export here</div>
+      <div class="upload-sub">or <span onclick="document.getElementById('xlsx-file').click()">browse to upload</span> &nbsp;·&nbsp; <span onclick="loadSample()">load sample data</span></div>
+    </div>
+    <button class="btn primary" id="stake-btn" onclick="loadFromStake()" style="width:100%;margin-top:10px;padding:12px;font-size:14px;">
+      ⚡ Load live from Stake SMSF
+    </button>
+    <div id="stake-status" style="font-size:12px;color:var(--text-muted);margin-top:6px;text-align:center;display:none;"></div>
+    <div style="display:none">
+    </div>
+
+    <div class="card">
+      <div class="section-label">Cash balance</div>
+      <div class="cash-row">
+        <span style="font-size:13px;color:var(--text-secondary)">Cash available</span>
+        <input class="cash-input" type="number" id="cash-input" min="0" step="100" placeholder="0" oninput="onCashChange()">
+      </div>
+      <div class="cash-note" id="cash-note">Cash is shown in your portfolio but not counted as a holding — targets are split equally across your investments only.</div>
+    </div>
+  </div>
+
+  <div id="app-content" style="display:none; margin-top:1.5rem;">
+    <div class="metrics" id="metrics"></div>
+    <div class="tabs">
+      <button class="tab active" onclick="showTab('holdings')">Holdings</button>
+      <button class="tab" onclick="showTab('rebalance')">Rebalance</button>
+      <button class="tab" onclick="showTab('targets')">Set targets</button>
+    </div>
+
+    <div id="tab-holdings">
+      <div class="card"><table id="holdings-table"></table></div>
+    </div>
+
+    <div id="tab-rebalance" style="display:none">
+      <div class="threshold-row">
+        <span>Flag drift above</span>
+        <input type="range" min="1" max="15" value="5" step="1" id="threshold-slider" oninput="updateThreshold()">
+        <span class="threshold-val" id="threshold-display">5%</span>
+      </div>
+      <div class="card"><table id="rebalance-table"></table></div>
+    </div>
+
+    <div id="tab-targets" style="display:none">
+      <div class="card">
+        <div style="font-size:13px;color:var(--text-secondary);margin-bottom:12px;">Override target value per holding. Cash is excluded from equal-weight calculations.</div>
+        <div id="target-inputs"></div>
+        <hr class="divider">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+          <span class="total-badge" id="total-badge"></span>
+          <div style="display:flex;gap:8px;">
+            <button class="btn" onclick="resetTargets()">Reset to equal weight</button>
+            <button class="btn primary" onclick="applyTargets()">Apply targets ↗</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script>
+let rawHoldings = [], holdings = [], targetValues = {}, threshold = 5, cashValue = 0;
+const COLORS = ['#378ADD','#1D9E75','#D85A30','#D4537E','#7F77DD','#BA7517','#888780'];
+const CASH_COLOR = '#639922';
+
+const SAMPLE = [
+  {symbol:'ASIA', name:'Betashares Asia Technology Tigers ETF', value:16862.3,  totalReturn:4961.73,  totalReturnPct:'32.46%'},
+  {symbol:'MQG',  name:'Macquarie Group Limited',               value:18452.64, totalReturn:698.59,   totalReturnPct:'3.93%'},
+  {symbol:'TOLL', name:'Betashares FTSE Global Infrastructure ETF', value:18103.8, totalReturn:211.54, totalReturnPct:'1.18%'},
+  {symbol:'CETF', name:'VanEck FTSE China A50 ETF',             value:18340.17, totalReturn:-573.51,  totalReturnPct:'-3.03%'},
+  {symbol:'GOLD', name:'Global X Physical Gold',                value:29366.4,  totalReturn:-3674.98, totalReturnPct:'-4.93%'},
+  {symbol:'DPM',  name:'DPM Metals Inc.',                       value:18943.76, totalReturn:-5108.78, totalReturnPct:'-8.99%'},
+];
+
+async function loadFromStake() {
+  const btn = document.getElementById('stake-btn');
+  const status = document.getElementById('stake-status');
+  btn.disabled = true;
+  btn.textContent = '⏳ Fetching from Stake...';
+  status.style.display = 'block';
+  status.textContent = 'Connecting to SnapTrade...';
+  try {
+    const res = await fetch('/api/snaptrade-holdings');
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to fetch');
+    // Pre-fill cash
+    cashValue = data.cash || 0;
+    document.getElementById('cash-input').value = cashValue;
+    processHoldings(data.holdings);
+    const d = new Date(data.fetchedAt);
+    status.textContent = `✓ Loaded ${data.holdings.length} holdings from ${data.account} · ${d.toLocaleTimeString('en-AU')}`;
+    status.style.color = 'var(--text-success)';
+    btn.textContent = '↻ Refresh from Stake';
+  } catch (err) {
+    status.textContent = '✗ ' + err.message;
+    status.style.color = 'var(--text-danger)';
+    btn.textContent = '⚡ Load live from Stake SMSF';
+  }
+  btn.disabled = false;
+}
+
+function loadSample() { processHoldings(SAMPLE); }
+function calcEqualWeight() {
+  const total = holdings.reduce((s,h)=>s+h.value,0);
+  const count = holdings.filter(h=>!h.isCash).length;
+  return count > 0 ? total/count : 0;
+}
+function resetTargets() {
+  const ew = calcEqualWeight();
+  holdings.filter(h=>!h.isCash).forEach(h=>{ targetValues[h.symbol]=ew; });
+  renderTargetInputs(); renderHoldings();
+  if (document.getElementById('tab-rebalance').style.display!=='none') renderRebalance();
+}
+function onCashChange() {
+  cashValue = parseFloat(document.getElementById('cash-input').value)||0;
+  if (rawHoldings.length) rebuildWithCash();
+}
+function rebuildWithCash() {
+  const all = [...rawHoldings];
+  if (cashValue>0) all.push({symbol:'CASH',name:'Cash',value:cashValue,totalReturn:0,totalReturnPct:'—',isCash:true});
+  const total = all.reduce((s,h)=>s+h.value,0);
+  const investCount = all.filter(h=>!h.isCash).length;
+  const ew = investCount>0 ? total/investCount : 0;
+  holdings = all.map((h,i)=>({...h, color:h.isCash?CASH_COLOR:COLORS[i%COLORS.length], currentPct:total>0?h.value/total*100:0}));
+  holdings.filter(h=>!h.isCash).forEach(h=>{ targetValues[h.symbol]=ew; });
+  const cashLine = cashValue>0 ? ` + ${fmtNum(cashValue)} cash` : '';
+  document.getElementById('cash-note').textContent =
+    `${investCount} investment${investCount!==1?'s':''}${cashLine} · equal weight $${fmtNum(ew)} each · total portfolio $${fmtNum(total)}`;
+  document.getElementById('app-content').style.display='block';
+  renderAll();
+}
+function processHoldings(rows) { rawHoldings=rows; rebuildWithCash(); }
+function parseXLSX(buffer) {
+  const wb = XLSX.read(buffer,{type:'array'});
+  const ws = wb.Sheets[wb.SheetNames[0]];
+  const rows = XLSX.utils.sheet_to_json(ws,{defval:''});
+  rawHoldings = rows
+    .filter(r=>r['Symbol']&&r['Symbol']!=='Grand Total'&&r['Value']&&!String(r['Value']).startsWith('$'))
+    .map(r=>({
+      symbol:String(r['Symbol']).trim(), name:String(r['Company Name']||r['Symbol']).trim(),
+      value:parseFloat(String(r['Value']).replace(/[$,]/g,'')),
+      totalReturn:parseFloat(String(r['Total Return']||'').replace(/[$,]/g,''))||0,
+      totalReturnPct:r['Total Return % (p.a.)']||'—',
+    }))
+    .filter(r=>!isNaN(r.value)&&r.value>0);
+  if (!rawHoldings.length) { alert('No valid holdings found. Check this is a Navexa holdings export.'); return; }
+  rebuildWithCash();
+}
+function fmt$(n) { return '$'+Math.abs(n).toLocaleString('en-AU',{minimumFractionDigits:0,maximumFractionDigits:0}); }
+function fmtNum(n) { return Math.round(n).toLocaleString('en-AU'); }
+function fmtPct(n) { return n.toFixed(1)+'%'; }
+function calcTrade(h) {
+  const tv = targetValues[h.symbol]||0;
+  const diff = tv-h.value;
+  const total = holdings.reduce((s,x)=>s+x.value,0);
+  const driftPct = total>0 ? (h.value-tv)/total*100 : 0;
+  const action = Math.abs(diff)<0.5?'hold':diff>0?'buy':'sell';
+  return {action,diff,driftPct};
+}
+function renderAll() { renderMetrics(); renderHoldings(); renderTargetInputs(); if(document.getElementById('tab-rebalance').style.display!=='none') renderRebalance(); }
+function renderMetrics() {
+  const total = holdings.reduce((s,h)=>s+h.value,0);
+  const ew = calcEqualWeight();
+  const totalReturn = holdings.filter(h=>!h.isCash).reduce((s,h)=>s+h.totalReturn,0);
+  let maxDriftPct=0;
+  holdings.filter(h=>!h.isCash).forEach(h=>{ const {driftPct}=calcTrade(h); maxDriftPct=Math.max(maxDriftPct,Math.abs(driftPct)); });
+  const retPos = totalReturn>=0;
+  document.getElementById('metrics').innerHTML=`
+    <div class="metric"><div class="metric-label">Total portfolio</div><div class="metric-value">${fmt$(total)}</div></div>
+    <div class="metric"><div class="metric-label">Target per holding</div><div class="metric-value">${fmt$(ew)}</div></div>
+    <div class="metric"><div class="metric-label">Total return</div><div class="metric-value ${retPos?'pos':'neg'}">${retPos?'+':'−'}${fmt$(totalReturn)}</div></div>
+    <div class="metric"><div class="metric-label">Max drift</div><div class="metric-value ${maxDriftPct>threshold?'neg':''}">${fmtPct(maxDriftPct)}</div></div>`;
+}
+function renderHoldings() {
+  const total = holdings.reduce((s,h)=>s+h.value,0);
+  let html=`<tr><th style="width:28%">Asset</th><th style="width:13%">Value</th><th style="width:13%">Target</th><th style="width:16%">To rebalance</th><th style="width:13%">Return</th><th style="width:17%">Allocation</th></tr>`;
+  holdings.forEach(h=>{
+    if (h.isCash) { html+=`<tr><td><div class="ticker" style="color:${CASH_COLOR}">${h.symbol}<span class="cash-tag">cash</span></div><div class="name">${h.name}</div></td><td>${fmt$(h.value)}</td><td style="color:var(--text-muted)">—</td><td style="color:var(--text-muted)">—</td><td style="color:var(--text-muted)">—</td><td><div class="bar-wrap"><span style="font-size:11px;color:var(--text-muted)">${fmtPct(h.currentPct)}</span></div></td></tr>`; return; }
+    const tv=targetValues[h.symbol]||0, tp=total>0?tv/total*100:0;
+    const {action,diff}=calcTrade(h);
+    const sign=action==='buy'?'+':action==='sell'?'−':'';
+    const retPos=h.totalReturn>=0;
+    const tradeCell=action==='hold'?`<td><span class="pill hold">hold</span><br><span class="trade-amount hold">—</span></td>`:`<td><span class="pill ${action}">${action}</span><br><span class="trade-amount ${action}">${sign}${fmt$(Math.abs(diff))}</span></td>`;
+    html+=`<tr><td><div class="ticker">${h.symbol}</div><div class="name">${h.name}</div></td><td>${fmt$(h.value)}</td><td>${fmt$(tv)}</td>${tradeCell}<td style="color:${retPos?'var(--text-success)':'var(--text-danger)'}">${retPos?'+':'−'}${fmt$(h.totalReturn)}<br><span style="font-size:11px;color:var(--text-muted)">${h.totalReturnPct} p.a.</span></td><td><div class="bar-wrap"><span style="font-size:11px;color:var(--text-muted);min-width:52px;text-align:right">${fmtPct(h.currentPct)} / ${fmtPct(tp)}</span><div class="bar-track"><div class="bar-fill" style="width:${Math.min(tp,100)}%;background:${h.color};opacity:0.35"></div><div class="bar-fill" style="width:${Math.min(h.currentPct,100)}%;background:${h.color}"></div></div></div></td></tr>`;
+  });
+  document.getElementById('holdings-table').innerHTML=html;
+}
+function renderRebalance() {
+  let html=`<tr><th style="width:26%">Asset</th><th style="width:13%">Value</th><th style="width:13%">Target</th><th style="width:12%">Drift</th><th style="width:18%">To rebalance</th><th style="width:18%">Action</th></tr>`;
+  holdings.forEach(h=>{
+    if (h.isCash) { html+=`<tr><td><div class="ticker" style="color:${CASH_COLOR}">${h.symbol}<span class="cash-tag">cash</span></div><div class="name">${h.name}</div></td><td>${fmt$(h.value)}</td><td style="color:var(--text-muted)">—</td><td style="color:var(--text-muted)">—</td><td style="color:var(--text-muted)">—</td><td><span class="pill cash">cash</span></td></tr>`; return; }
+    const {action,diff,driftPct}=calcTrade(h);
+    const absDrift=Math.abs(driftPct);
+    const driftColor=absDrift>=threshold?(driftPct>0?'var(--text-danger)':'var(--text-success)'):'var(--text-muted)';
+    const sign=action==='buy'?'+':action==='sell'?'−':'';
+    html+=`<tr><td><div class="ticker">${h.symbol}</div><div class="name">${h.name}</div></td><td>${fmt$(h.value)}</td><td>${fmt$(targetValues[h.symbol]||0)}</td><td style="color:${driftColor}">${driftPct>0?'+':''}${fmtPct(driftPct)}</td><td class="trade-amount ${action}">${action==='hold'?'—':sign+fmt$(Math.abs(diff))}</td><td><span class="pill ${action}">${action}</span></td></tr>`;
+  });
+  document.getElementById('rebalance-table').innerHTML=html;
+}
+function renderTargetInputs() {
+  let html='';
+  holdings.forEach(h=>{
+    if(h.isCash){ html+=`<div class="target-row"><span style="font-weight:600;font-size:13px;min-width:52px;color:${CASH_COLOR}">${h.symbol}</span><span style="font-size:12px;color:var(--text-muted);flex:1">${h.name}</span><span style="font-size:12px;color:var(--text-muted);font-style:italic">excluded from targets</span></div>`; return; }
+    const tv=Math.round(targetValues[h.symbol]||0);
+    html+=`<div class="target-row"><span style="font-weight:600;font-size:13px;min-width:52px;color:${h.color}">${h.symbol}</span><span style="font-size:12px;color:var(--text-muted);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${h.name}</span><span style="font-size:13px;color:var(--text-muted);margin-right:2px">$</span><input class="target-input" type="number" min="0" step="100" id="t-${h.symbol}" value="${tv}" oninput="updateTargetTotal()"></div>`;
+  });
+  document.getElementById('target-inputs').innerHTML=html;
+  updateTargetTotal();
+}
+function updateTargetTotal() {
+  let sum=0;
+  holdings.filter(h=>!h.isCash).forEach(h=>{ sum+=parseFloat(document.getElementById('t-'+h.symbol)?.value||0); });
+  const total=holdings.reduce((s,h)=>s+h.value,0);
+  const diff=sum-total, sign=diff>=0?'+':'−';
+  const badge=document.getElementById('total-badge');
+  badge.textContent=`Targets total $${fmtNum(sum)} (${sign}$${fmtNum(Math.abs(diff))} vs portfolio)`;
+  badge.className='total-badge '+(Math.abs(diff)<1?'ok':'err');
+}
+function applyTargets() {
+  holdings.filter(h=>!h.isCash).forEach(h=>{ targetValues[h.symbol]=parseFloat(document.getElementById('t-'+h.symbol)?.value||0); });
+  renderAll(); showTab('rebalance');
+}
+function showTab(name) {
+  ['holdings','rebalance','targets'].forEach(t=>{ document.getElementById('tab-'+t).style.display=t===name?'block':'none'; });
+  document.querySelectorAll('.tab').forEach((b,i)=>{ b.classList.toggle('active',['holdings','rebalance','targets'][i]===name); });
+  if(name==='rebalance') renderRebalance();
+}
+function updateThreshold() {
+  threshold=parseInt(document.getElementById('threshold-slider').value);
+  document.getElementById('threshold-display').textContent=threshold+'%';
+  renderMetrics(); renderRebalance();
+}
+
+document.getElementById('xlsx-file').addEventListener('change',e=>{
+  const file=e.target.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=ev=>parseXLSX(new Uint8Array(ev.target.result));
+  reader.readAsArrayBuffer(file);
+});
+const dz=document.getElementById('drop-zone');
+dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('drag');});
+dz.addEventListener('dragleave',()=>dz.classList.remove('drag'));
+dz.addEventListener('drop',e=>{
+  e.preventDefault();dz.classList.remove('drag');
+  const file=e.dataTransfer.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=ev=>parseXLSX(new Uint8Array(ev.target.result));
+  reader.readAsArrayBuffer(file);
+});
+
+// PWA install prompt
+let installPrompt = null;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  installPrompt = e;
+  document.getElementById('install-banner').classList.add('show');
+});
+document.getElementById('install-btn').addEventListener('click', async () => {
+  if (!installPrompt) return;
+  installPrompt.prompt();
+  const result = await installPrompt.userChoice;
+  if (result.outcome === 'accepted') document.getElementById('install-banner').classList.remove('show');
+  installPrompt = null;
+});
+</script>
+
+</body>
+</html>
