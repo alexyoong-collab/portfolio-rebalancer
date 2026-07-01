@@ -227,6 +227,12 @@
       <div class="upload-title">Drop your Navexa export here</div>
       <div class="upload-sub">or <span onclick="document.getElementById('xlsx-file').click()">browse to upload</span> &nbsp;·&nbsp; <span onclick="loadSample()">load sample data</span></div>
     </div>
+    <button class="btn primary" id="stake-btn" onclick="loadFromStake()" style="width:100%;margin-top:10px;padding:12px;font-size:14px;">
+      ⚡ Load live from Stake SMSF
+    </button>
+    <div id="stake-status" style="font-size:12px;color:var(--text-muted);margin-top:6px;text-align:center;display:none;"></div>
+    <div style="display:none">
+    </div>
 
     <div class="card">
       <div class="section-label">Cash balance</div>
@@ -291,6 +297,33 @@ const SAMPLE = [
   {symbol:'GOLD', name:'Global X Physical Gold',                value:29366.4,  totalReturn:-3674.98, totalReturnPct:'-4.93%'},
   {symbol:'DPM',  name:'DPM Metals Inc.',                       value:18943.76, totalReturn:-5108.78, totalReturnPct:'-8.99%'},
 ];
+
+async function loadFromStake() {
+  const btn = document.getElementById('stake-btn');
+  const status = document.getElementById('stake-status');
+  btn.disabled = true;
+  btn.textContent = '⏳ Fetching from Stake...';
+  status.style.display = 'block';
+  status.textContent = 'Connecting to SnapTrade...';
+  try {
+    const res = await fetch('/api/snaptrade-holdings');
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to fetch');
+    // Pre-fill cash
+    cashValue = data.cash || 0;
+    document.getElementById('cash-input').value = cashValue;
+    processHoldings(data.holdings);
+    const d = new Date(data.fetchedAt);
+    status.textContent = `✓ Loaded ${data.holdings.length} holdings from ${data.account} · ${d.toLocaleTimeString('en-AU')}`;
+    status.style.color = 'var(--text-success)';
+    btn.textContent = '↻ Refresh from Stake';
+  } catch (err) {
+    status.textContent = '✗ ' + err.message;
+    status.style.color = 'var(--text-danger)';
+    btn.textContent = '⚡ Load live from Stake SMSF';
+  }
+  btn.disabled = false;
+}
 
 function loadSample() { processHoldings(SAMPLE); }
 function calcEqualWeight() {
